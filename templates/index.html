@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ===== SEO ===== -->
+  <title>{{ profile.name }} | {{ profile.short_title }}</title>
+  <meta name="description" content="{{ profile.meta_description }}">
+  <meta name="keywords" content="{{ profile.keywords }}">
+  <meta name="author" content="{{ profile.name }}">
+  <meta name="theme-color" content="#0a1424">
+  {% if site_url %}<link rel="canonical" href="{{ site_url }}/">{% endif %}
+
+  <!-- ===== Open Graph (link previews on LinkedIn, WhatsApp, etc.) ===== -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ profile.name }} | {{ profile.short_title }}">
+  <meta property="og:description" content="{{ profile.meta_description }}">
+  {% if site_url %}
+  <meta property="og:url" content="{{ site_url }}/">
+  <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='images/og-image.png') }}">
+  {% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Adds the "js" class early so the fade-in effect only runs when JavaScript works -->
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+
+{# ---------- Reusable icon macro (inline SVG = no extra downloads) ---------- #}
+{% macro icon(name) -%}
+<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  {%- if name == 'linkedin' -%}
+    <path fill="currentColor" stroke="none" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4v11H3zM9.5 9.5h3.8v1.6h.1c.5-1 1.8-1.9 3.7-1.9 4 0 4.7 2.6 4.7 6v5.3h-4v-4.7c0-1.1 0-2.6-1.6-2.6s-1.8 1.2-1.8 2.5v4.8h-4z"/>
+  {%- elif name == 'github' -%}
+    <path fill="currentColor" stroke="none" d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/>
+  {%- elif name == 'mail' -%}
+    <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+  {%- elif name == 'download' -%}
+    <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/>
+  {%- elif name == 'arrow' -%}
+    <path d="M5 12h14m-6-6l6 6-6 6"/>
+  {%- elif name == 'external' -%}
+    <path d="M14 4h6v6m0-6L10 14M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>
+  {%- elif name == 'file' -%}
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>
+  {%- elif name == 'wave' -%}
+    <path d="M2 12c2-7 4-7 6 0s4 7 6 0 4-7 6 0"/>
+  {%- elif name == 'instrument' -%}
+    <rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M6 12l3-3 3 4 3-5 3 3M8 20h8M12 16v4"/>
+  {%- elif name == 'chamber' -%}
+    <path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0z"/>
+  {%- elif name == 'code' -%}
+    <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>
+  {%- elif name == 'chip' -%}
+    <path d="M7 7h10v10H7zM10 2v3M14 2v3M10 19v3M14 19v3M2 10h3M2 14h3M19 10h3M19 14h3"/>
+  {%- elif name == 'check' -%}
+    <path d="M5 12.5l4.5 4.5L19 7.5"/>
+  {%- elif name == 'pin' -%}
+    <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>
+  {%- elif name == 'cap' -%}
+    <path d="M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}
+
+{# ---------- Social link (shows a hint while the URL is still a placeholder) ---------- #}
+{% macro social(key, label, icon_name) -%}
+  {%- if link_ready[key] -%}
+    <a class="icon-link" href="{{ ('mailto:' ~ links[key]) if key == 'email' else links[key] }}"
+       {%- if key != 'email' %} target="_blank" rel="noopener noreferrer"{% endif %}
+       aria-label="{{ label }}">{{ icon(icon_name) }}<span class="icon-link__text">{{ label }}</span></a>
+  {%- else -%}
+    <a class="icon-link" href="#contact" aria-label="{{ label }} (link not added yet)"
+       title="Add your {{ label }} link in app.py">{{ icon(icon_name) }}<span class="icon-link__text">{{ label }}</span></a>
+  {%- endif -%}
+{%- endmacro %}
+
+{# ---------- Reusable project card. Used once per entry in PROJECTS (app.py) ---------- #}
+{% macro project_card(p, loop_index) -%}
+<article class="project reveal{% if loop_index is even %} project--flip{% endif %}" aria-labelledby="project-{{ loop_index }}-title">
+  <div class="project__media">
+    <img src="{{ url_for('static', filename='images/' ~ p.image) }}" alt="{{ p.image_alt }}"
+         width="1200" height="750" loading="lazy" decoding="async">
+  </div>
+  <div class="project__body">
+    <p class="eyebrow">{{ p.label }}</p>
+    <h3 id="project-{{ loop_index }}-title">{{ p.title }}</h3>
+    <p class="project__desc">{{ p.description }}</p>
+    {% if p.note %}<p class="project__note">{{ p.note }}</p>{% endif %}
+    <h4 class="project__sub">Key features</h4>
+    <ul class="feature-list">
+      {% for f in p.features %}<li>{{ f }}</li>{% endfor %}
+    </ul>
+    <ul class="tags" aria-label="Technologies used">
+      {% for t in p.tech %}<li>{{ t }}</li>{% endfor %}
+    </ul>
+    {% if p.link %}
+    <a class="btn btn--ghost" href="{{ p.link }}" target="_blank" rel="noopener noreferrer">
+      {{ p.link_text }} {{ icon('external') }}
+    </a>
+    {% endif %}
+  </div>
+</article>
+{%- endmacro %}
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===================== HEADER / NAV ===================== -->
+  <header class="site-header" id="top">
+    <div class="container header__inner">
+      <a class="brand" href="#home" aria-label="{{ profile.name }} - back to top">
+        <span class="brand__mark" aria-hidden="true">PM</span>
+        <span class="brand__name">{{ profile.name }}</span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+
+      <nav class="nav" id="primary-nav" aria-label="Main navigation">
+        <ul class="nav__list">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#experience">Experience</a></li>
+          <li><a href="#education">Education</a></li>
+          <li><a href="#resume">Resume</a></li>
+          <li><a href="#contact" class="nav__cta">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ===================== 1. HOME / HERO ===================== -->
+    <section class="hero" id="home" aria-labelledby="hero-title">
+      <div class="container hero__inner">
+        <div class="hero__text">
+          <p class="eyebrow eyebrow--light">RF Engineering &middot; Test Automation</p>
+          <h1 id="hero-title">{{ profile.name }}</h1>
+          <p class="hero__role">{{ profile.title }}</p>
+          <p class="hero__intro">{{ profile.tagline }}</p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#projects">View My Projects {{ icon('arrow') }}</a>
+            <a class="btn btn--outline" href="{{ url_for('static', filename=resume_file) }}" download>
+              {{ icon('download') }} Download Resume
+            </a>
+          </div>
+
+          <div class="hero__social" aria-label="Social links">
+            {{ social('linkedin', 'LinkedIn', 'linkedin') }}
+            {{ social('github', 'GitHub', 'github') }}
+            {{ social('email', 'Email', 'mail') }}
+          </div>
+        </div>
+
+        <!-- Decorative "instrument display": RF hardware meets software -->
+        <div class="hero__visual" aria-hidden="true">
+          <div class="scope">
+            <div class="scope__bar">
+              <span class="scope__title">P1dB COMPRESSION</span>
+              <span class="scope__badge">Illustration</span>
+            </div>
+            <svg class="scope__svg" viewBox="0 0 480 340" role="presentation">
+              <g class="scope__grid">
+                <path d="M40 20H440M40 70H440M40 120H440M40 170H440M40 220H440M40 270H440M40 320H440"/>
+                <path d="M40 20V320M90 20V320M140 20V320M190 20V320M240 20V320M290 20V320M340 20V320M390 20V320M440 20V320"/>
+              </g>
+              <path class="scope__axis" d="M40 20V320H440"/>
+              <path class="scope__ideal" d="M40 300L440 60"/>
+              <path class="scope__curve" d="M40 300L180 216C240 180 290 160 330 152S410 142 440 140"/>
+              <path class="scope__bracket" d="M300 144V160M296 144H304M296 160H304"/>
+              <circle class="scope__marker" cx="300" cy="160" r="5"/>
+              <text class="scope__label scope__label--accent" x="314" y="182">P1dB</text>
+              <text class="scope__label" x="440" y="338" text-anchor="end">Pin (dBm)</text>
+              <text class="scope__label" x="46" y="14">Pout (dBm)</text>
+              <text class="scope__label" x="86" y="60">Ideal linear</text>
+            </svg>
+            <div class="scope__foot">
+              <span>Python &middot; PyVISA</span>
+              <span>Signal Gen &rarr; DUT &rarr; Spectrum Analyzer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 2. ABOUT ===================== -->
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="container about">
+        <div class="about__photo reveal">
+          <img src="{{ url_for('static', filename=profile_image) }}"
+               alt="Portrait of {{ profile.name }}" width="600" height="750" loading="lazy" decoding="async">
+        </div>
+        <div class="about__text reveal">
+          <p class="eyebrow">About me</p>
+          <h2 id="about-title" class="section__title">Hardware testing, backed by software automation</h2>
+          <p class="lead">{{ about.intro }}</p>
+          <h3 class="about__sub">Experience includes</h3>
+          <ul class="check-list">
+            {% for point in about.experience_points %}<li>{{ icon('check') }}{{ point }}</li>{% endfor %}
+          </ul>
+          <p class="about__closing">{{ about.closing }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 3. TECHNICAL SKILLS ===================== -->
+    <section class="section section--alt" id="skills" aria-labelledby="skills-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Technical skills</p>
+          <h2 id="skills-title" class="section__title">From the RF bench to Python automation</h2>
+        </header>
+
+        <div class="skills-grid">
+          {% for group in skills %}
+          <article class="skill-card reveal{% if loop.first %} skill-card--wide{% endif %}">
+            <div class="skill-card__head">
+              <span class="skill-card__icon">{{ icon(group.icon) }}</span>
+              <h3>{{ group.title }}</h3>
+            </div>
+            <ul class="chips">
+              {% for item in group['items'] %}<li>{{ item }}</li>{% endfor %}
+            </ul>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 4. FEATURED PROJECTS ===================== -->
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Featured projects</p>
+          <h2 id="projects-title" class="section__title">Engineering tools I have built</h2>
+          <p class="section__sub">Python tools that automate RF measurements and data logging, plus a personal web project.</p>
+        </header>
+
+        <div class="projects">
+          {% for p in projects %}
+            {{ project_card(p, loop.index) }}
+          {% endfor %}
+
+          <!-- Smaller secondary category: Electronics & Embedded -->
+          <article class="mini-project reveal" aria-labelledby="electronics-title">
+            <div class="mini-project__media">
+              <img src="{{ url_for('static', filename='images/' ~ electronics.image) }}" alt="{{ electronics.image_alt }}"
+                   width="1200" height="750" loading="lazy" decoding="async">
+            </div>
+            <div class="mini-project__body">
+              <p class="eyebrow">{{ electronics.label }}</p>
+              <h3 id="electronics-title">{{ electronics.title }}</h3>
+              <p class="mini-project__desc">{{ electronics.description }}</p>
+              <ul class="chips">
+                {% for item in electronics['items'] %}<li>{{ item }}</li>{% endfor %}
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 5. EXPERIENCE ===================== -->
+    <section class="section section--alt" id="experience" aria-labelledby="experience-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Professional experience</p>
+          <h2 id="experience-title" class="section__title">Where I work</h2>
+        </header>
+
+        <ol class="timeline">
+          {% for job in experience %}
+          <li class="timeline__item reveal">
+            <span class="timeline__dot" aria-hidden="true"></span>
+            <div class="timeline__card">
+              <p class="timeline__period">{{ job.period }}</p>
+              <h3>{{ job.role }}</h3>
+              <p class="timeline__company">{{ job.company }}</p>
+              <ul class="timeline__points">
+                {% for point in job.points %}<li>{{ point }}</li>{% endfor %}
+              </ul>
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===================== 6. EDUCATION ===================== -->
+    <section class="section" id="education" aria-labelledby="education-title">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="eyebrow">Education</p>
+          <h2 id="education-title" class="section__title">Academic background</h2>
+        </header>
+
+        <div class="edu-list">
+          {% for item in education %}
+          <article class="edu-card reveal">
+            <span class="edu-card__icon">{{ icon('cap') }}</span>
+            <div>
+              <h3>{{ item.degree }}</h3>
+              <p>{{ item.detail }}</p>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 7. RESUME ===================== -->
+    <section class="section section--alt" id="resume" aria-labelledby="resume-title">
+      <div class="container">
+        <div class="resume-card reveal">
+          <span class="resume-card__icon">{{ icon('file') }}</span>
+          <div class="resume-card__text">
+            <p class="eyebrow">Resume</p>
+            <h2 id="resume-title">Want the full details?</h2>
+            <p>Download my resume as a PDF, or view it directly in your browser.</p>
+          </div>
+          <div class="resume-card__actions">
+            <a class="btn btn--primary" href="{{ url_for('static', filename=resume_file) }}" download>
+              {{ icon('download') }} Download My Resume
+            </a>
+            <a class="btn btn--ghost" href="{{ url_for('static', filename=resume_file) }}" target="_blank" rel="noopener noreferrer">
+              View Resume {{ icon('external') }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 8. CONTACT ===================== -->
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <div class="container contact">
+        <div class="contact__info reveal">
+          <p class="eyebrow">Contact</p>
+          <h2 id="contact-title" class="section__title">Let's connect</h2>
+          <p class="section__sub">Open to conversations about RF testing, test automation and engineering opportunities.</p>
+
+          <ul class="contact__list">
+            <li>
+              <span class="contact__icon">{{ icon('mail') }}</span>
+              <div>
+                <span class="contact__label">Email</span>
+                {% if link_ready.email %}
+                  <a href="mailto:{{ links.email }}">{{ links.email }}</a>
+                {% else %}
+                  <span class="contact__todo">Add your email in app.py</span>
+                {% endif %}
+              </div>
+            </li>
+            <li>
+              <span class="contact__icon">{{ icon('linkedin') }}</span>
+              <div>
+                <span class="contact__label">LinkedIn</span>
+                {% if link_ready.linkedin %}
+                  <a href="{{ links.linkedin }}" target="_blank" rel="noopener noreferrer">View my LinkedIn profile</a>
+                {% else %}
+                  <span class="contact__todo">Add your LinkedIn URL in app.py</span>
+                {% endif %}
+              </div>
+            </li>
+            <li>
+              <span class="contact__icon">{{ icon('github') }}</span>
+              <div>
+                <span class="contact__label">GitHub</span>
+                {% if link_ready.github %}
+                  <a href="{{ links.github }}" target="_blank" rel="noopener noreferrer">View my GitHub profile</a>
+                {% else %}
+                  <span class="contact__todo">Add your GitHub URL in app.py</span>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Simple contact form: no backend. It opens the visitor's email app with the message pre-filled. -->
+        <form class="contact__form reveal" id="contact-form" data-email="{{ links.email if link_ready.email else '' }}" novalidate>
+          <h3>Send a message</h3>
+          <div class="field">
+            <label for="cf-name">Your name</label>
+            <input id="cf-name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="cf-email">Your email</label>
+            <input id="cf-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" name="message" rows="5" required></textarea>
+          </div>
+          <button class="btn btn--primary" type="submit">Open in my email app {{ icon('arrow') }}</button>
+          <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <div>
+        <p class="footer__name">{{ profile.name }}</p>
+        <p class="footer__role">{{ profile.short_title }}</p>
+      </div>
+      <div class="footer__links" aria-label="Footer links">
+        {{ social('linkedin', 'LinkedIn', 'linkedin') }}
+        {{ social('github', 'GitHub', 'github') }}
+        {{ social('email', 'Email', 'mail') }}
+      </div>
+    </div>
+    <div class="container footer__legal">
+      <p>&copy; {{ year }} {{ profile.name }}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</body>
+</html>
